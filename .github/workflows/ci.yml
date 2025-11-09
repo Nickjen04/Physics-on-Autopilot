@@ -1,0 +1,61 @@
+name: Run HZZ Notebook & Publish Dashboard
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (incluye submódulos)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install runtime deps (headless)
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            papermill nbconvert ipykernel \
+            coffea~=0.7 uproot>=5,<6 awkward>=2,<3 vector>=1.4,<2 \
+            hist>=2,<3 boost-histogram>=1.4,<2 \
+            numpy>=1.26,<2 pandas>=2.2,<3 matplotlib>=3.8,<4 scipy>=1.11,<2 \
+            correctionlib>=2,<3 tqdm>=4.64
+
+      # (Opcional) cache muy básico si tu NB descarga muestras a build/out
+      # - name: Cache OpenData
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: build/out
+      #     key: opendata-${{ runner.os }}-v1
+
+      - name: Run notebook and build dashboard
+        run: scripts/run_hzz_dashboard.sh
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
