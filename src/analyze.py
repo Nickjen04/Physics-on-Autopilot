@@ -1,1 +1,0 @@
-print("analyze: ¡hola mundo!")
