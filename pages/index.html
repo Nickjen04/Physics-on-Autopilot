@@ -188,6 +188,12 @@
             object-fit: cover;
             border-radius: 12px;
             display: block;
+            transition: transform 0.3s ease; /* Añadimos transición para suavizar el efecto */
+        }
+
+        /* Efecto hover para reducir las imágenes */
+        .image-wrapper:hover img {
+            transform: scale(0.95); /* Reducimos la imagen al 95% */
         }
 
         .image-right img {
